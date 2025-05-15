@@ -65,8 +65,9 @@ function App() {
       
   }, []);
 
+  // This handler now expects to receive the whole place object
   const handlePlaceSelect = (place) => {
-    console.log('Selected place:', place);
+    console.log('Selected place in App:', place);
     setSelectedPlace(place);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -139,7 +140,10 @@ function App() {
       
       <main className={selectedPlace ? "container mx-auto px-4 py-8" : "w-full px-4 py-8"}>
         {selectedPlace ? (
-          <PlaceDetail place={selectedPlace} onBack={handleBackToList} />
+          <PlaceDetail 
+            place={selectedPlace} 
+            onBack={handleBackToList} 
+          />
         ) : (
           <>
             {loading ? (
@@ -149,10 +153,7 @@ function App() {
             ) : error ? (
               <div className="text-center text-red-500">{error}</div>
             ) : (
-              <PlaceList 
-                places={places} 
-                onSelectPlace={handlePlaceSelect} 
-              />
+              <PlaceList onSelectPlace={handlePlaceSelect} />
             )}
           </>
         )}

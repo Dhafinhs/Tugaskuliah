@@ -21,7 +21,7 @@ function PlaceDetail({ place, onBack }) {
   const getImageSource = () => {
     if (imageError) return backupImage;
     
-    if (!place.images || place.images.length === 0) {
+    if (!place?.images || place.images.length === 0) {
       return 'https://via.placeholder.com/800x400?text=No+Image';
     }
     
@@ -34,42 +34,69 @@ function PlaceDetail({ place, onBack }) {
   
   useEffect(() => {
     const fetchReviews = async () => {
+      if (!place || !place._id) return;
+      
       try {
-        // If backend is not ready, use sample data
-        // Normally you would fetch from API: await fetch(`http://localhost:5000/api/reviews/place/${place._id}`)
+        setLoading(true);
+        
+        // Backend endpoint for reviews
+        const response = await fetch(`http://localhost:5000/api/reviews/place/${place._id}`);
+        
+        if (!response.ok) {
+          console.log(`Failed to fetch reviews, status: ${response.status}`);
+          
+          // Use sample review data that matches backend structure
+          setReviews([
+            {
+              _id: '101',
+              placeId: place._id,
+              userName: 'Jane Smith',
+              rating: 5,
+              comment: 'Absolutely loved this place! The food was amazing and the service was exceptional.',
+              visitDate: new Date('2023-05-15').toISOString(),
+              userProfile: 'https://randomuser.me/api/portraits/women/44.jpg'
+            },
+            {
+              _id: '102',
+              placeId: place._id,
+              userName: 'Mike Johnson',
+              rating: 4,
+              comment: 'Great atmosphere and delicious food. Slightly pricey but worth it for special occasions.',
+              visitDate: new Date('2023-04-20').toISOString(),
+              userProfile: 'https://randomuser.me/api/portraits/men/32.jpg'
+            }
+          ]);
+        } else {
+          const data = await response.json();
+          console.log('Reviews received:', data);
+          setReviews(Array.isArray(data) ? data : []);
+        }
         setLoading(false);
-        setReviews([
-          {
-            _id: '101',
-            userName: 'Jane Smith',
-            rating: 5,
-            comment: 'Absolutely loved this place! The food was amazing and the service was exceptional.',
-            visitDate: new Date('2023-05-15'),
-            userProfile: 'https://randomuser.me/api/portraits/women/44.jpg'
-          },
-          {
-            _id: '102',
-            userName: 'Mike Johnson',
-            rating: 4,
-            comment: 'Great atmosphere and delicious food. Slightly pricey but worth it for special occasions.',
-            visitDate: new Date('2023-04-20'),
-            userProfile: 'https://randomuser.me/api/portraits/men/32.jpg'
-          }
-        ]);
       } catch (err) {
+        console.error("Error fetching reviews:", err);
         setError('Failed to load reviews');
         setLoading(false);
       }
     };
     
     fetchReviews();
-  }, [place._id]);
+  }, [place]);
   
   const handleAddReview = (newReview) => {
     setReviews(prevReviews => [newReview, ...prevReviews]);
   };
   
-  if (!place) return <div>Loading...</div>;
+  if (!place) return (
+    <div className="text-center py-8">
+      <p>No place details available. Please select a place from the list.</p>
+      <button 
+        onClick={onBack}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Go Back
+      </button>
+    </div>
+  );
   
   return (
     <div className="fade-in">
