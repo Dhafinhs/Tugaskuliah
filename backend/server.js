@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import placeRoutes from './routes/placeRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import userRoutes from './routes/userRoutes.js'; // Import user routes
 
 dotenv.config();
 
@@ -120,6 +121,7 @@ app.get('/api/debug', async (req, res) => {
 // Routes
 app.use('/api/places', placeRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/users', userRoutes); // Tambahkan rute untuk pengguna
 
 // Root route with connection status
 app.get('/', (req, res) => {

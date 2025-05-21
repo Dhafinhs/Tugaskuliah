@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import Link dari react-router-dom
 
 function Navbar({ onShowReviewForm }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -6,11 +7,7 @@ function Navbar({ onShowReviewForm }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 0);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -25,70 +22,47 @@ function Navbar({ onShowReviewForm }) {
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white shadow-md py-2'
-          : 'bg-transparent py-4'
+      className={`fixed top-0 left-0 w-full z-50 bg-white shadow-md transition-all duration-300 ${
+        isScrolled ? 'shadow-lg' : ''
       }`}
     >
-      <div className="container mx-auto px-4 flex justify-between items-center">
-        <a 
-          href="#" 
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToTop();
-          }}
-          className="text-2xl font-bold flex items-center space-x-2"
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <a
+          href="#"
+          className="text-2xl font-bold text-blue-600 flex items-center space-x-2"
+          onClick={(e) => e.preventDefault()}
         >
           <span className="text-3xl">🍽️</span>
-          <span className={`${isScrolled ? 'text-blue-600' : 'text-white'} font-extrabold text-shadow-sm`}>
-            TastyReviews
-          </span>
+          <span>TastyReviews</span>
         </a>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          <a 
-            href="#" 
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToTop();
-            }}
-            className={`font-medium hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-800' : 'text-white font-semibold'}`}
+          <Link
+            to="/"
+            className="text-gray-700 font-medium hover:text-blue-600 transition-colors"
           >
             Home
-          </a>
-          <a 
-            href="#places" 
-            className={`font-medium hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-800' : 'text-white font-semibold'}`}
+          </Link>
+          <Link
+            to="/profile"
+            className="text-gray-700 font-medium hover:text-blue-600 transition-colors"
           >
-            Explore
-          </a>
-          <a 
-            href="#top-rated" 
-            className={`font-medium hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-800' : 'text-white font-semibold'}`}
-          >
-            Top Rated
-          </a>
-          <a 
-            href="#" 
-            className={`font-medium hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-800' : 'text-white font-semibold'}`}
-          >
-            About
-          </a>
-          <button 
-            className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 
-                      transition-colors transform hover:scale-105 duration-200"
-            onClick={onShowReviewForm}
+            Profile
+          </Link>
+          <button
+            className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
+            onClick={() => onShowReviewForm(null)} // Pass null for global review
           >
             Add Review
           </button>
         </div>
 
         {/* Mobile Navigation Button */}
-        <button 
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+        <button
           className="md:hidden text-gray-600"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,7 +117,7 @@ function Navbar({ onShowReviewForm }) {
                         transition-colors"
               onClick={() => {
                 setMobileMenuOpen(false);
-                if (onShowReviewForm) onShowReviewForm();
+                if (onShowReviewForm) onShowReviewForm(null); // Pass null for global review
               }}
             >
               Add Review
