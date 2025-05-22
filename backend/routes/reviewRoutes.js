@@ -33,11 +33,36 @@ router.get('/:id', async (req, res) => {
 // Create a new review
 router.post('/', async (req, res) => {
   try {
-    const { placeId, userId, userName, userProfile, rating, comment, visitDate } = req.body;
+    const { placeId, userId, userName, userProfile, rating, comment, visitDate, restaurantName } = req.body;
+
+    let targetPlaceId = placeId;
+
+    // Check if the restaurant already exists by name
+    if (!targetPlaceId) {
+      const existingPlace = await Place.findOne({ name: restaurantName });
+      if (existingPlace) {
+        targetPlaceId = existingPlace._id;
+      } else {
+        // Create a new place if it doesn't exist
+        const newPlace = new Place({
+          name: restaurantName,
+          category: req.body.category || 'Restaurant',
+          description: `User-submitted ${req.body.category || 'Restaurant'}.`,
+          address: req.body.address || 'Unknown location',
+          priceRange: req.body.priceRange || '$$',
+          city: req.body.city || 'Jakarta',
+          images: ['https://via.placeholder.com/500x300?text=No+Image'],
+          overallRating: rating,
+          reviewCount: 1,
+        });
+        const savedPlace = await newPlace.save();
+        targetPlaceId = savedPlace._id;
+      }
+    }
 
     // Create a new review
     const review = new Review({
-      placeId,
+      placeId: targetPlaceId,
       userId,
       userName,
       userProfile,
@@ -49,13 +74,13 @@ router.post('/', async (req, res) => {
     const savedReview = await review.save();
 
     // Update the place's overall rating and review count
-    const place = await Place.findById(placeId);
+    const place = await Place.findById(targetPlaceId);
     if (place) {
-      const reviews = await Review.find({ placeId });
+      const reviews = await Review.find({ placeId: targetPlaceId });
       const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
       const overallRating = totalRating / reviews.length;
 
-      await Place.findByIdAndUpdate(placeId, {
+      await Place.findByIdAndUpdate(targetPlaceId, {
         overallRating: parseFloat(overallRating.toFixed(1)),
         reviewCount: reviews.length,
       });

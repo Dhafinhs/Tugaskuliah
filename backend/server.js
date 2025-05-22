@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import placeRoutes from './routes/placeRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import userRoutes from './routes/userRoutes.js'; // Import user routes
+import Place from './models/placeModel.js'; // Pastikan model Place diimpor
 
 dotenv.config();
 
@@ -16,11 +17,12 @@ console.log('Environment variables loaded?', !!process.env.MONGODB_URI);
 
 // Fix CORS with more permissive settings for development
 app.use(cors({
-  origin: '*',
+  origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true
 }));
+console.log('CORS enabled for all origins'); // Debug log
 
 // Make sure we can parse JSON bodies
 app.use(express.json());
@@ -115,6 +117,18 @@ app.get('/api/debug', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Debug endpoint to check if models are registered
+app.get('/api/debug/models', (req, res) => {
+  try {
+    const models = mongoose.modelNames();
+    console.log('Registered models:', models); // Debug log
+    res.json({ models });
+  } catch (error) {
+    console.error('Error in /api/debug/models:', error); // Debug log
+    res.status(500).json({ message: 'Error fetching models', error: error.message });
   }
 });
 

@@ -164,4 +164,25 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Search places by name
+router.get('/search', async (req, res) => {
+  try {
+    const { name } = req.query;
+    console.log('Search query received:', name); // Debug log
+
+    if (!name) {
+      return res.status(400).json({ message: 'Name query parameter is required' });
+    }
+
+    // Ensure the Place model is being used correctly
+    const places = await Place.find({ name: { $regex: name, $options: 'i' } });
+    console.log('Search results:', places); // Debug log
+
+    res.json(places);
+  } catch (error) {
+    console.error('Error in /search endpoint:', error); // Debug log
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
 export default router;

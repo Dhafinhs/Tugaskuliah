@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const CITY_OPTIONS = [
   'Jakarta', 'Bogor', 'Depok', 'Tangerang', 'Bekasi', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Yogyakarta', 'Bali', 'Makassar', 'Palembang', 'Batam', 'Malang', 'Pekanbaru', 'Samarinda', 'Banjarmasin', 'Pontianak', 'Ambon', 'Kupang', 'Manado', 'Jayapura', 'Mataram', 'Bandar Lampung', 'Cirebon', 'Tasikmalaya', 'Sukabumi', 'Cimahi', 'Tangerang Selatan', 'Lainnya'
 ];
 
-function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user }) {
+function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user, addXp = true }) {
   const [formData, setFormData] = useState({
     restaurantName: initialValues.restaurantName || '',
     category: initialValues.category || 'Restaurant',
@@ -17,6 +17,32 @@ function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user 
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [existingPlace, setExistingPlace] = useState(null); // State to store existing place info
+
+  useEffect(() => {
+    const checkExistingPlace = async () => {
+      if (formData.restaurantName.trim() === '') {
+        setExistingPlace(null);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/places/search?name=${formData.restaurantName}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.length > 0) {
+            setExistingPlace(data[0]); // Assume the first match is the relevant one
+          } else {
+            setExistingPlace(null);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking existing place:', err);
+      }
+    };
+
+    checkExistingPlace();
+  }, [formData.restaurantName]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,62 +58,33 @@ function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user 
     setError('');
 
     try {
-      let reviewPlaceId = placeId;
-
-      // If no placeId is provided, create a new place
-      if (!reviewPlaceId) {
-        const placeData = {
-          name: formData.restaurantName,
-          category: formData.category,
-          description: `User-submitted ${formData.category.toLowerCase()}.`,
-          address: formData.address || 'Unknown location',
-          priceRange: formData.priceRange,
-          images: ['https://via.placeholder.com/500x300?text=No+Image'],
-          overallRating: formData.rating,
-          reviewCount: 1,
-          city: formData.city,
-        };
-
-        const response = await fetch('http://localhost:5000/api/places', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(placeData),
-        });
-
-        if (response.ok) {
-          const newPlace = await response.json();
-          reviewPlaceId = newPlace._id;
-          if (onReviewAdded) onReviewAdded(null, newPlace);
-        } else {
-          throw new Error('Failed to create place');
-        }
-      }
-
-      // Create the review
       const reviewData = {
-        placeId: reviewPlaceId,
+        ...formData,
+        placeId,
         userId: user.id,
         userName: user.name,
         userProfile: user.profileImage || 'https://randomuser.me/api/portraits/lego/1.jpg',
-        rating: formData.rating,
-        comment: formData.comment,
-        visitDate: formData.visitDate,
       };
 
-      const reviewResponse = await fetch('http://localhost:5000/api/reviews', {
+      const response = await fetch('http://localhost:5000/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reviewData),
       });
 
-      if (reviewResponse.ok) {
-        const savedReview = await reviewResponse.json();
+      if (response.ok) {
+        const savedReview = await response.json();
         if (onReviewAdded) onReviewAdded(savedReview);
+
+        // Update XP only if addXp is true
+        if (addXp) {
+          user.xp += 10;
+        }
+
+        onClose();
       } else {
         throw new Error('Failed to create review');
       }
-
-      onClose();
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
@@ -121,6 +118,15 @@ function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user 
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4">
             <p>{error}</p>
+          </div>
+        )}
+
+        {existingPlace && (
+          <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-4">
+            <p>
+              <strong>Note:</strong> The restaurant "{existingPlace.name}" already exists in the database.
+              Your review will be added to this restaurant.
+            </p>
           </div>
         )}
 

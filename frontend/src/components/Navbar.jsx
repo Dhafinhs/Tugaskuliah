@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Import Link dari react-router-dom
+import { Link } from 'react-router-dom';
 
-function Navbar({ onShowReviewForm }) {
+function Navbar({ onShowReviewForm, user }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -16,10 +16,6 @@ function Navbar({ onShowReviewForm }) {
     };
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-50 bg-white shadow-md transition-all duration-300 ${
@@ -28,14 +24,13 @@ function Navbar({ onShowReviewForm }) {
     >
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         {/* Logo */}
-        <a
-          href="#"
+        <Link
+          to="/"
           className="text-2xl font-bold text-blue-600 flex items-center space-x-2"
-          onClick={(e) => e.preventDefault()}
         >
           <span className="text-3xl">🍽️</span>
           <span>TastyReviews</span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
@@ -57,6 +52,17 @@ function Navbar({ onShowReviewForm }) {
           >
             Add Review
           </button>
+
+          {/* User Info */}
+          {user && (
+            <div className="flex items-center space-x-4">
+              <div className="text-gray-700">
+                <p className="text-sm font-medium">XP: {user.xp}</p>
+                <p className="text-sm font-medium">Level: {user.rank}</p>
+                <p className="text-sm font-medium">Reviews: {user.reviewsCount}</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Mobile Navigation Button */}
@@ -80,41 +86,22 @@ function Navbar({ onShowReviewForm }) {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white shadow-lg absolute w-full animate-fadeDown">
           <div className="flex flex-col p-4 space-y-4">
-            <a 
-              href="#" 
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToTop();
-                setMobileMenuOpen(false);
-              }}
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
               className="font-medium p-2 hover:bg-blue-50 rounded-md"
             >
               Home
-            </a>
-            <a 
-              href="#places" 
+            </Link>
+            <Link
+              to="/profile"
               onClick={() => setMobileMenuOpen(false)}
               className="font-medium p-2 hover:bg-blue-50 rounded-md"
             >
-              Explore
-            </a>
-            <a 
-              href="#top-rated" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="font-medium p-2 hover:bg-blue-50 rounded-md"
-            >
-              Top Rated
-            </a>
-            <a 
-              href="#" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="font-medium p-2 hover:bg-blue-50 rounded-md"
-            >
-              About
-            </a>
-            <button 
-              className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 
-                        transition-colors"
+              Profile
+            </Link>
+            <button
+              className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
               onClick={() => {
                 setMobileMenuOpen(false);
                 if (onShowReviewForm) onShowReviewForm(null); // Pass null for global review
@@ -122,6 +109,15 @@ function Navbar({ onShowReviewForm }) {
             >
               Add Review
             </button>
+
+            {/* User Info */}
+            {user && (
+              <div className="text-gray-700 mt-4">
+                <p className="text-sm font-medium">XP: {user.xp}</p>
+                <p className="text-sm font-medium">Level: {user.rank}</p>
+                <p className="text-sm font-medium">Reviews: {user.reviewsCount}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
