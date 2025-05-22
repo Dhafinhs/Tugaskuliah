@@ -5,6 +5,19 @@ import User from '../models/userModel.js'; // Import model User
 
 const router = express.Router();
 
+// Add admin middleware
+const adminMiddleware = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token' });
+  try {
+    const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    if (!decoded.isAdmin) return res.status(403).json({ message: 'Admin only' });
+    next();
+  } catch {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
 // Get all reviews for a place
 router.get('/place/:placeId', async (req, res) => {
   try {
@@ -159,6 +172,33 @@ router.delete('/:id', async (req, res) => {
     }
     
     res.json({ message: 'Review deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Admin: Delete any review
+router.delete('/admin/:id', adminMiddleware, async (req, res) => {
+  try {
+    const review = await Review.findByIdAndDelete(req.params.id);
+    if (!review) return res.status(404).json({ message: 'Review not found' });
+    
+    // Update the place's overall rating
+    const reviews = await Review.find({ placeId: review.placeId });
+    if (reviews.length > 0) {
+      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+      const overallRating = totalRating / reviews.length;
+      await Place.findByIdAndUpdate(review.placeId, {
+        overallRating: parseFloat(overallRating.toFixed(1)),
+        reviewCount: reviews.length
+      });
+    } else {
+      await Place.findByIdAndUpdate(review.placeId, {
+        overallRating: 0,
+        reviewCount: 0
+      });
+    }
+    res.json({ message: 'Review deleted by admin' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

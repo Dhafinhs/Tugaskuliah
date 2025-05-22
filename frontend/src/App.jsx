@@ -5,6 +5,7 @@ import PlaceDetail from './components/PlaceDetail';
 import ReviewForm from './components/ReviewForm';
 import AuthForm from './components/AuthForm';
 import Profile from './components/Profile';
+import AdminDashboard from './components/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -110,6 +111,7 @@ function App() {
           />
           <Route path="/place/:id" element={<PlaceDetail user={user} />} /> {/* Pastikan user diteruskan */}
           <Route path="/profile" element={<Profile user={user} onLogout={handleLogout} />} /> {/* Logout hanya di halaman profil */}
+          <Route path="/admin" element={<AdminDashboard user={user} />} />
         </Routes>
         {showGlobalReviewForm && (
           <ReviewForm

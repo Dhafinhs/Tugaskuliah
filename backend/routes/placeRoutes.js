@@ -3,6 +3,19 @@ import Place from '../models/placeModel.js';
 
 const router = express.Router();
 
+// Add admin middleware
+const adminMiddleware = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token' });
+  try {
+    const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    if (!decoded.isAdmin) return res.status(403).json({ message: 'Admin only' });
+    next();
+  } catch {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
 // Get all places
 router.get('/', async (req, res) => {
   try {
@@ -159,6 +172,19 @@ router.delete('/:id', async (req, res) => {
     }
     
     res.json({ message: 'Place deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Admin: Delete any place
+router.delete('/admin/:id', adminMiddleware, async (req, res) => {
+  try {
+    const place = await Place.findByIdAndDelete(req.params.id);
+    if (!place) return res.status(404).json({ message: 'Place not found' });
+    // Optionally, delete all reviews for this place
+    await Review.deleteMany({ placeId: req.params.id });
+    res.json({ message: 'Place deleted by admin' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

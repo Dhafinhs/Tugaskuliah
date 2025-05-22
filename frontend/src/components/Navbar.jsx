@@ -46,6 +46,14 @@ function Navbar({ onShowReviewForm, user }) {
           >
             Profile
           </Link>
+          {user?.isAdmin && (
+            <Link
+              to="/admin"
+              className="text-gray-700 font-medium hover:text-blue-600 transition-colors"
+            >
+              Admin
+            </Link>
+          )}
           <button
             className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
             onClick={() => onShowReviewForm(null)} // Pass null for global review
@@ -100,6 +108,15 @@ function Navbar({ onShowReviewForm, user }) {
             >
               Profile
             </Link>
+            {user?.isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="font-medium p-2 hover:bg-blue-50 rounded-md"
+              >
+                Admin
+              </Link>
+            )}
             <button
               className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
               onClick={() => {
