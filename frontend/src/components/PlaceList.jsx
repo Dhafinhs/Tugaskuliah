@@ -1,19 +1,27 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+const CITY_OPTIONS = [
+  'Jakarta', 'Bogor', 'Depok', 'Tangerang', 'Bekasi', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Yogyakarta', 'Bali', 'Makassar', 'Palembang', 'Batam', 'Malang', 'Pekanbaru', 'Samarinda', 'Banjarmasin', 'Pontianak', 'Ambon', 'Kupang', 'Manado', 'Jayapura', 'Mataram', 'Bandar Lampung', 'Cirebon', 'Tasikmalaya', 'Sukabumi', 'Cimahi', 'Tangerang Selatan', 'Lainnya'
+];
+
 function PlaceList({ places, onSelectPlace }) {
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
+  const [selectedCity, setSelectedCity] = useState('all');
   const [filteredPlaces, setFilteredPlaces] = useState([]);
 
-  // Filter and sort places whenever `places`, `category`, or `sortBy` changes
   useEffect(() => {
-    console.log('Received places in PlaceList:', places); // Debug log
     let filtered = [...places];
 
     // Filter by category
     if (category !== 'all') {
       filtered = filtered.filter(place => place.category === category);
+    }
+
+    // Filter by selected city
+    if (selectedCity !== 'all') {
+      filtered = filtered.filter(place => place.city === selectedCity);
     }
 
     // Sort by rating or reviews
@@ -24,11 +32,14 @@ function PlaceList({ places, onSelectPlace }) {
     }
 
     setFilteredPlaces(filtered);
-  }, [places, category, sortBy]);
+  }, [places, category, sortBy, selectedCity]);
 
   const handleSelectPlace = (place) => {
-    console.log('Selected place:', place);
     onSelectPlace(place);
+  };
+
+  const handleCityChange = (e) => {
+    setSelectedCity(e.target.value);
   };
 
   return (
@@ -77,6 +88,21 @@ function PlaceList({ places, onSelectPlace }) {
             </button>
           </div>
 
+          {/* Filter kota dropdown */}
+          <div className="flex items-center gap-2">
+            <label className="text-gray-600">Filter City:</label>
+            <select
+              value={selectedCity}
+              onChange={handleCityChange}
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All</option>
+              {CITY_OPTIONS.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex justify-center md:justify-end items-center">
             <label className="text-gray-600 mr-2">Sort by:</label>
             <select
@@ -116,6 +142,7 @@ function PlaceList({ places, onSelectPlace }) {
                   <span className="text-sm text-gray-500">{place.category}</span>
                   <span className="text-sm text-gray-500">{place.priceRange}</span>
                 </div>
+                <div className="text-sm text-gray-500">City: {place.city || '-'}</div>
               </div>
             </Link>
           ))}

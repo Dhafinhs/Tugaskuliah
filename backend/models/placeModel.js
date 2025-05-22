@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
 
+const CITY_ENUM = [
+  'Jakarta', 'Bogor', 'Depok', 'Tangerang', 'Bekasi', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Yogyakarta', 'Bali', 'Makassar', 'Palembang', 'Batam', 'Malang', 'Pekanbaru', 'Samarinda', 'Banjarmasin', 'Pontianak', 'Ambon', 'Kupang', 'Manado', 'Jayapura', 'Mataram', 'Bandar Lampung', 'Cirebon', 'Tasikmalaya', 'Sukabumi', 'Cimahi', 'Tangerang Selatan', 'Lainnya'
+];
+
 const placeSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -9,6 +13,12 @@ const placeSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true
+  },
+  city: {
+    type: String,
+    required: true,
+    enum: CITY_ENUM,
+    default: 'Jakarta'
   },
   address: {
     type: String,
@@ -28,7 +38,6 @@ const placeSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    // Make sure categories match exactly what we use in the frontend
     enum: ['Restaurant', 'Cafe', 'Street Food', 'Bakery', 'Other']
   },
   priceRange: {
@@ -57,22 +66,18 @@ const placeSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Optional: Schema pre-save validation with default values and category normalization
+// Normalisasi kategori dan gambar default
 placeSchema.pre('save', function(next) {
-  // Normalize category (case-sensitive match)
   const validCategories = ['Restaurant', 'Cafe', 'Street Food', 'Bakery', 'Other'];
   if (!validCategories.includes(this.category)) {
-    // Try to find a case-insensitive match
     const lowerCategory = this.category.toLowerCase();
     for (const valid of validCategories) {
       if (valid.toLowerCase() === lowerCategory) {
-        this.category = valid; // Use the correct case
+        this.category = valid;
         break;
       }
     }
   }
-  
-  // Set default image if empty
   if (!this.images || this.images.length === 0) {
     const defaultImages = {
       'Restaurant': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
@@ -81,14 +86,12 @@ placeSchema.pre('save', function(next) {
       'Bakery': 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086',
       'Other': 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17'
     };
-    
     this.images = [defaultImages[this.category] || defaultImages['Other']];
   }
-  
   next();
 });
 
-// Create indexes
+// Indexes
 placeSchema.index({ category: 1 });
 placeSchema.index({ overallRating: -1 });
 placeSchema.index({ 'location.coordinates': '2dsphere' });

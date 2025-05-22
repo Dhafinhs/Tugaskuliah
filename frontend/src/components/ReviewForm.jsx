@@ -1,5 +1,9 @@
 import { useState } from 'react';
 
+const CITY_OPTIONS = [
+  'Jakarta', 'Bogor', 'Depok', 'Tangerang', 'Bekasi', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Yogyakarta', 'Bali', 'Makassar', 'Palembang', 'Batam', 'Malang', 'Pekanbaru', 'Samarinda', 'Banjarmasin', 'Pontianak', 'Ambon', 'Kupang', 'Manado', 'Jayapura', 'Mataram', 'Bandar Lampung', 'Cirebon', 'Tasikmalaya', 'Sukabumi', 'Cimahi', 'Tangerang Selatan', 'Lainnya'
+];
+
 function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user }) {
   const [formData, setFormData] = useState({
     restaurantName: initialValues.restaurantName || '',
@@ -9,6 +13,7 @@ function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user 
     visitDate: new Date().toISOString().split('T')[0],
     address: initialValues.address || '',
     priceRange: initialValues.priceRange || '$$',
+    city: initialValues.city || 'Jakarta',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -40,6 +45,7 @@ function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user 
           images: ['https://via.placeholder.com/500x300?text=No+Image'],
           overallRating: formData.rating,
           reviewCount: 1,
+          city: formData.city,
         };
 
         const response = await fetch('http://localhost:5000/api/places', {
@@ -83,7 +89,6 @@ function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user 
 
       onClose();
     } catch (err) {
-      console.error('Error creating review:', err);
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -131,6 +136,22 @@ function ReviewForm({ placeId, onClose, onReviewAdded, initialValues = {}, user 
               placeholder="Enter restaurant name"
               required
             />
+          </div>
+
+          {/* City dropdown */}
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">City</label>
+            <select
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              {CITY_OPTIONS.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
           </div>
 
           <div className="mb-4">
