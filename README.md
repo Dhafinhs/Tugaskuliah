@@ -1,26 +1,38 @@
 
+
 # Kelompok 13
 
 ## Anggota
+
 #### Dhafin Hamizan Setiawan (2306267145)
+
 #### Rafi Naufal Aryaputra (2306250680)
+
 #### Daffa Bagus Dhiananto (2306250756)
+
 #### Samih Bassam (2306250623)
 
----
+## Pembagian Tugas
 
+| Nama                      | Tugas             |
+| ------------------------- | ----------------- |
+| **Samih Bassam**          | Backend, Frontend |
+| **Dhafin Hamizan**        | Backend           |
+| **Rafi Naufal**           | Docker            |
+| **Daffa Bagus Dhiananto** | Frontend          |
+
+---
 
 # Web Review Tempat & Kuliner
 
 Aplikasi web full-stack untuk menampilkan dan mengelola ulasan tempat dan kuliner dengan struktur data fleksibel. Setiap review bisa berisi rating, komentar, dan foto, serta mendukung pencarian cepat berdasarkan lokasi dan rating. Backend dibangun dengan Node.js dan MongoDB, serta seluruh aplikasi dapat dijalankan menggunakan Docker.
 
-
 ## 🔥 Fitur Unggulan
 
-* Review dengan format dinamis (foto, teks, rating).
-* Query cepat berdasarkan lokasi atau rating.
-* Penyimpanan data menggunakan **MongoDB Atlas** (NoSQL).
-* Arsitektur berbasis **Docker** untuk kemudahan pengembangan dan deployment.
+* Review dengan format dinamis (foto, teks, rating)
+* Query cepat berdasarkan lokasi atau rating
+* Penyimpanan data menggunakan **MongoDB Atlas** (NoSQL)
+* Arsitektur berbasis **Docker** untuk kemudahan pengembangan dan deployment
 
 ## 🗂️ Struktur Proyek
 
@@ -63,7 +75,7 @@ Buka langsung `index.html` dalam folder `frontend/` di browser, atau gunakan eks
 #### Build dan Run Container:
 
 ```bash
-docker build -t web-review .
+docker build -t web-review .  
 docker run -p 3000:3000 --env-file ./Backend/.env web-review
 ```
 
